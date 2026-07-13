@@ -1,0 +1,230 @@
+.clia-page {
+  min-height: 100vh;
+  background: var(--bg-page, #f4f6f9);
+}
+
+.clia-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.clia-page__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.clia-page__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.clia-page__body {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.clia-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.clia-section__heading {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.clia-section__desc {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.clia-fetch-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.clia-fetch-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+}
+
+.clia-fetch-row button {
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clia-fetch-row button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clia-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.clia-meta {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.clia-meta a {
+  color: #2563eb;
+  word-break: break-all;
+}
+
+.clia-pre {
+  margin: 0;
+  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  overflow: auto;
+  max-height: 400px;
+}
+
+.clia-signal-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.clia-signal-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.clia-signal-row__key {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.clia-signal-row__val {
+  color: #111827;
+}
+
+.clia-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clia-tag {
+  padding: 4px 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  color: #1e40af;
+}
+
+.clia-profile-card {
+  padding: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.clia-profile-card--unknown {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.clia-profile-name {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.clia-confidence {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.clia-confidence--high {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.clia-confidence--medium {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.clia-confidence--low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.clia-reasoning {
+  margin: 12px 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.clia-columns-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-top: 12px;
+}
+
+.clia-columns-table th,
+.clia-columns-table td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.clia-columns-table th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.clia-footer {
+  margin-top: 24px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}

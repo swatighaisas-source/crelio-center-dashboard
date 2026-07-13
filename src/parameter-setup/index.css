@@ -1,0 +1,218 @@
+/*
+ * Tailwind v4 — Preflight intentionally NOT imported (the host ships its own
+ * global reset). Utilities are imported UNLAYERED so their class specificity
+ * (0,1,0) beats the host's unlayered `* { margin:0; padding:0 }` reset — otherwise
+ * every Tailwind padding/margin/border utility inside the tool gets zeroed out.
+ * Element-level resets live in `@layer base` so the unlayered utilities always
+ * win over them.
+ */
+@layer theme, base;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css";
+
+@theme {
+  /* Align with admin UI blue accents */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-ink-900: #0f172a;
+  --color-ink-700: #334155;
+  --color-ink-500: #64748b;
+  --color-ink-300: #cbd5e1;
+  --color-ink-200: #e2e8f0;
+  --color-ink-100: #f1f5f9;
+  --color-ink-50: #f8fafc;
+}
+
+/* Scoped element resets (the host's global reset already zeroes margin/padding
+   and sets border-box; utilities are unlayered so they override everything here). */
+@layer base {
+  .param-setup-root *,
+  .param-setup-root *::before,
+  .param-setup-root *::after {
+    /* default so Tailwind `border-*` width utilities render as a solid border */
+    border-width: 0;
+    border-style: solid;
+  }
+
+  .param-setup-root {
+    /* Match the host (Lab setup & feedback) typography */
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: #333333;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .param-setup-root h1,
+  .param-setup-root h2,
+  .param-setup-root h3,
+  .param-setup-root h4,
+  .param-setup-root h5,
+  .param-setup-root h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .param-setup-root a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  .param-setup-root button,
+  .param-setup-root input,
+  .param-setup-root optgroup,
+  .param-setup-root select,
+  .param-setup-root textarea {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+
+  .param-setup-root button,
+  .param-setup-root [type="button"],
+  .param-setup-root [type="reset"],
+  .param-setup-root [type="submit"] {
+    background-color: transparent;
+    background-image: none;
+    cursor: pointer;
+    -webkit-appearance: button;
+  }
+
+  .param-setup-root :disabled {
+    cursor: default;
+  }
+
+  .param-setup-root ol,
+  .param-setup-root ul,
+  .param-setup-root menu {
+    list-style: none;
+  }
+
+  .param-setup-root img,
+  .param-setup-root svg,
+  .param-setup-root video,
+  .param-setup-root canvas {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .param-setup-root table {
+    border-collapse: collapse;
+  }
+
+  .param-setup-root [hidden] {
+    display: none;
+  }
+
+  .param-setup-root input::placeholder,
+  .param-setup-root textarea::placeholder {
+    color: var(--color-ink-500);
+    opacity: 1;
+  }
+}
+
+/* Thin, tasteful scrollbars for tables */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-ink-200);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-300);
+}
+
+/* Grid cell editing focus ring */
+.cell-input:focus {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: -2px;
+}
+
+/* Table row hover highlight */
+.row-zebra:nth-child(odd) {
+  background: #fff;
+}
+.row-zebra:nth-child(even) {
+  background: var(--color-ink-50);
+}
+
+/* AG Grid — match the Crelio data-grid look (fafafa headers, e0e0e0 borders,
+   32px rows, Roboto 12px, #2563eb accents, #eff4ff hover). */
+.param-setup-root .ag-theme-alpine {
+  --ag-font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ag-font-size: 12px;
+  --ag-foreground-color: #333333;
+  --ag-secondary-foreground-color: #666666;
+  --ag-data-color: #333333;
+  --ag-header-foreground-color: #333333;
+  --ag-header-background-color: #fafafa;
+  --ag-header-height: 36px;
+  --ag-row-height: 32px;
+  --ag-border-color: #e0e0e0;
+  --ag-borders: solid 1px;
+  --ag-row-border-color: #f0f0f0;
+  --ag-cell-horizontal-border: solid #f0f0f0;
+  --ag-background-color: #ffffff;
+  --ag-odd-row-background-color: #ffffff;
+  --ag-row-hover-color: #eff4ff;
+  --ag-selected-row-background-color: #eff4ff;
+  --ag-range-selection-background-color: rgba(37, 99, 235, 0.1);
+  --ag-range-selection-border-color: #2563eb;
+  --ag-active-color: #2563eb;
+  --ag-alpine-active-color: #2563eb;
+  --ag-checkbox-checked-color: #2563eb;
+  --ag-input-focus-border-color: #2563eb;
+  --ag-cell-horizontal-padding: 8px;
+  --ag-border-radius: 4px;
+  --ag-wrapper-border-radius: 4px;
+  --ag-header-column-separator-display: block;
+  --ag-header-column-separator-color: #f0f0f0;
+}
+.param-setup-root .ag-theme-alpine .ag-header-cell-text {
+  font-weight: 500;
+}
+.ag-theme-alpine .ag-row-key-focus {
+  background-color: rgba(239, 246, 255, 0.95) !important;
+}
+
+/* Per-row disabled: field not applicable to this parameter type.
+   Muted text only — no grey background tinge. */
+.ag-lab-grid .ag-cell-param-disabled,
+.ag-lab-grid .ag-cell-param-disabled:focus {
+  color: #b6bdc7 !important;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+/* Indeterminate progress bar (file parsing) */
+@keyframes param-progress-indeterminate {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+.param-setup-root .animate-progress-indeterminate {
+  animation: param-progress-indeterminate 1.1s ease-in-out infinite;
+}
+
+/* Bulk Update mode — render editable value cells as input fields,
+   mirroring the inline-edit grids (e.g. Insurance Master). */
+.ag-bulk-edit.ag-theme-alpine .ag-row .ag-cell:not(.ag-cell-param-disabled):not(.ag-selection-checkbox-cell) {
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #d9d9d9;
+  border-radius: 4px;
+}
+.ag-bulk-edit.ag-theme-alpine .ag-row .ag-cell:not(.ag-cell-param-disabled):not(.ag-selection-checkbox-cell):hover {
+  box-shadow: inset 0 0 0 1px #b9c2cf;
+}
+.ag-bulk-edit.ag-theme-alpine .ag-cell.ag-cell-focus,
+.ag-bulk-edit.ag-theme-alpine .ag-cell:focus-within {
+  box-shadow: inset 0 0 0 1.5px #2563eb !important;
+}

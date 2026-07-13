@@ -1,0 +1,1 @@
+export { resolvePageTitle } from "./resolvePageBreadcrumb";

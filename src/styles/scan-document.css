@@ -1,0 +1,881 @@
+
+/* ════════════════════════════════════════════════════════════
+   Upload Bill Attachments modal  (.bill-attach-*)
+════════════════════════════════════════════════════════════ */
+
+.bill-attach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.bill-attach-modal {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #202932;
+}
+
+/* Connected badge */
+.bill-attach-connected-badge {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e6f4ea;
+  border: 1px solid #a8d5b0;
+  border-radius: 20px;
+  padding: 5px 12px 5px 10px;
+  font-size: 12px;
+  color: #2e7d32;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.bill-attach-connected-dot {
+  width: 7px;
+  height: 7px;
+  background: #43a047;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bill-attach-connected-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2e7d32;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 0 0 2px;
+  margin-left: 2px;
+}
+
+/* Header */
+.bill-attach-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.bill-attach-modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.bill-attach-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bill-attach-modal-close:hover {
+  color: #555;
+}
+
+/* Body */
+.bill-attach-body {
+  padding: 20px 20px 0;
+}
+
+.bill-attach-body--scan {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bill-attach-body--preview {
+  padding: 14px 20px 0;
+}
+
+/* Upload tiles row */
+.bill-attach-tiles-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.bill-attach-tile-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bill-attach-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c8d6e5;
+  border-radius: 6px;
+  min-height: 148px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+
+.bill-attach-tile:hover,
+.bill-attach-tile--scan:hover {
+  border-color: #3b71ca;
+}
+
+.bill-attach-tile-btn {
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #3b71ca;
+  background: #ffffff;
+  border: 1px solid #3b71ca;
+  border-radius: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.bill-attach-tile-btn:hover {
+  background: #f0f5fc;
+}
+
+.bill-attach-tile-btn--primary {
+  background: #1a6fbd;
+  color: #ffffff;
+  border-color: #1a6fbd;
+  font-weight: 500;
+}
+
+.bill-attach-tile-btn--primary:hover {
+  background: #1560a8;
+}
+
+.bill-attach-hidden-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Meta text */
+.bill-attach-extensions {
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0 0 6px;
+}
+
+.bill-attach-meta {
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  margin: 0 0 4px;
+}
+
+/* Footer */
+.bill-attach-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 14px;
+}
+
+.bill-attach-footer--preview {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 10px 16px 14px;
+}
+
+.bill-attach-footer--preview .bill-attach-btn {
+  padding: 0 10px;
+  font-size: 11px;
+  height: 28px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bill-attach-footer--preview .bill-attach-file-type-label {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.bill-attach-footer--preview .bill-attach-select {
+  height: 28px;
+  font-size: 11px;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.bill-attach-footer--preview .bill-attach-duplex-label {
+  font-size: 11px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.bill-attach-btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #333;
+  background: #ffffff;
+  border: 1px solid #c8d0dc;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bill-attach-btn:hover {
+  background: #f5f5f5;
+}
+
+.bill-attach-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bill-attach-btn--danger {
+  color: #c0392b;
+  border-color: #e0aca8;
+}
+
+.bill-attach-btn--danger:hover {
+  background: #fdf0ef;
+}
+
+.bill-attach-btn--primary {
+  background: #1a6fbd;
+  color: #ffffff;
+  border-color: #1a6fbd;
+}
+
+.bill-attach-btn--primary:hover:not(:disabled) {
+  background: #1560a8;
+}
+
+.bill-attach-btn--teal {
+  background: #1b8c86;
+  color: #ffffff;
+  border-color: #1b8c86;
+  font-weight: 500;
+}
+
+.bill-attach-btn--teal:hover {
+  background: #167a75;
+}
+
+/* ── Scan Document screen ── */
+
+.bill-attach-scan-prompt {
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+  padding: 34px 0 22px;
+  flex: 1;
+}
+
+.bill-attach-scanning-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 0 18px;
+  flex: 1;
+}
+
+.bill-attach-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(26, 111, 189, 0.18);
+  border-top-color: #1a6fbd;
+  border-radius: 50%;
+  animation: bill-attach-spin 0.75s linear infinite;
+}
+
+.bill-attach-scanning-text {
+  font-size: 13px;
+  color: #666;
+}
+
+@keyframes bill-attach-spin {
+  to { transform: rotate(360deg); }
+}
+
+.bill-attach-scan-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 14px;
+  border-top: 1px solid #eef0f2;
+  gap: 10px;
+}
+
+.bill-attach-scan-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bill-attach-scan-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bill-attach-file-type-label {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+
+.bill-attach-select {
+  height: 30px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #333;
+  background: #ffffff;
+  border: 1px solid #c8d0dc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bill-attach-gear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #666;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.bill-attach-gear-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.bill-attach-duplex-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+}
+
+.bill-attach-duplex-label input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: #1a6fbd;
+  cursor: pointer;
+}
+
+.bill-attach-scan-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 18px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: #ffffff;
+  background: #1a6fbd;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bill-attach-scan-btn:hover:not(:disabled) {
+  background: #1560a8;
+}
+
+.bill-attach-scan-btn--scanning {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.bill-attach-scan-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: bill-attach-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── PDF Preview screen ── */
+
+.bill-attach-pdf-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px;
+}
+
+.bill-attach-pdf-viewer {
+  border: 1px solid #c8d0dc;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f4f6f8;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bill-attach-pdf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  background: #3a3a3a;
+  flex-shrink: 0;
+}
+
+.bill-attach-pdf-tbtn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 11px;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+.bill-attach-pdf-tbtn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.bill-attach-pdf-page-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #ccc;
+  margin: 0 4px;
+}
+
+.bill-attach-pdf-page-input {
+  width: 28px;
+  border: 1px solid #666;
+  background: #555;
+  color: #fff;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  padding: 1px 3px;
+}
+
+.bill-attach-pdf-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.bill-attach-pdf-page {
+  width: 160px;
+  height: 210px;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Scan Settings stacked modal ── */
+
+.bill-attach-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.bill-attach-settings-modal {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #202932;
+}
+
+.bill-attach-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.bill-attach-settings-field label {
+  display: block;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.bill-attach-settings-field select {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #333;
+  background: #ffffff;
+  border: 1px solid #c8d0dc;
+  border-radius: 4px;
+}
+
+.bill-attach-toggles-row {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.bill-attach-toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+}
+
+.bill-attach-toggle-item input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: #1a6fbd;
+  cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Document Editor modal  (.doc-editor-*)
+════════════════════════════════════════════════════════════ */
+
+.doc-editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.doc-editor-modal {
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.28);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #202932;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+}
+
+.doc-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e8eaed;
+  flex-shrink: 0;
+}
+
+.doc-editor-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.doc-editor-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.doc-editor-pagelist {
+  width: 148px;
+  flex-shrink: 0;
+  border-right: 1px solid #eceef0;
+  padding: 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fafbfc;
+}
+
+.doc-editor-thumb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 1px solid #e0e4e8;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.doc-editor-thumb.is-selected {
+  border-color: #1a6fbd;
+  box-shadow: 0 0 0 2px rgba(26, 111, 189, 0.18);
+}
+
+.doc-editor-thumb-num {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a6fbd;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.doc-editor-thumb-art {
+  border: 1px solid #e6e6e6;
+  background: #f4f6f8;
+  line-height: 0;
+}
+
+.doc-editor-thumb-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.doc-editor-thumb-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  border: 1px solid #d8dde2;
+  border-radius: 4px;
+  background: #fff;
+  color: #5a6470;
+  cursor: pointer;
+}
+
+.doc-editor-thumb-actions button:hover:not(:disabled) {
+  background: #eef4fb;
+  color: #1a6fbd;
+  border-color: #aacbe8;
+}
+
+.doc-editor-thumb-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.doc-editor-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eceef0;
+  flex-wrap: wrap;
+}
+
+.doc-editor-toolbar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 56px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: #44515e;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.doc-editor-toolbar button span {
+  white-space: nowrap;
+}
+
+.doc-editor-toolbar button:hover {
+  background: #eef4fb;
+  color: #1a6fbd;
+}
+
+.doc-editor-toolbar button.is-active {
+  background: #e3eefb;
+  color: #1a6fbd;
+  border-color: #aacbe8;
+}
+
+.doc-editor-toolbar-sep {
+  width: 1px;
+  height: 28px;
+  background: #e3e6e9;
+  margin: 0 4px;
+}
+
+.doc-editor-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  background: #f1f3f5;
+  overflow: auto;
+}
+
+.doc-editor-frame {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.doc-editor-stage-caption {
+  margin: 0;
+  font-size: 11px;
+  color: #6b7680;
+}
+
+.doc-editor-render {
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-editor-render-crop,
+.doc-editor-render-rot {
+  transform-origin: center center;
+}
+
+.doc-editor-render-rot svg {
+  display: block;
+}
+
+.doc-editor-crop-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.doc-editor-crop-rect {
+  position: absolute;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  cursor: move;
+}
+
+.doc-editor-crop-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 1px solid #1a6fbd;
+  border-radius: 2px;
+}
+
+.doc-editor-crop-handle.h-nw { left: -6px; top: -6px; cursor: nwse-resize; }
+.doc-editor-crop-handle.h-n  { left: calc(50% - 6px); top: -6px; cursor: ns-resize; }
+.doc-editor-crop-handle.h-ne { right: -6px; top: -6px; cursor: nesw-resize; }
+.doc-editor-crop-handle.h-e  { right: -6px; top: calc(50% - 6px); cursor: ew-resize; }
+.doc-editor-crop-handle.h-se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+.doc-editor-crop-handle.h-s  { left: calc(50% - 6px); bottom: -6px; cursor: ns-resize; }
+.doc-editor-crop-handle.h-sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+.doc-editor-crop-handle.h-w  { left: -6px; top: calc(50% - 6px); cursor: ew-resize; }
+
+.doc-editor-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid #e8eaed;
+  flex-shrink: 0;
+}
+
+.doc-editor-footer-hint {
+  font-size: 11px;
+  color: #6b7680;
+}
+
+.bill-attach-btn--edit {
+  color: #c2410c;
+  border-color: #f0a878;
+  font-weight: 500;
+}
+
+.bill-attach-btn--edit:hover {
+  background: #fdf3ec;
+}

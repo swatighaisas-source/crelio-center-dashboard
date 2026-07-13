@@ -1,0 +1,45 @@
+/*
+ * Host wrapper for the embedded parameter-setup tool.
+ * The tool manages its own internal scrolling (ag-grid panes), so the section
+ * fills the viewport below the 52px global top bar and clips overflow instead
+ * of growing the page. Content sits as a white card on a light gray canvas with
+ * generous padding, matching the host's center-section layout.
+ */
+.param-setup-page {
+  height: calc(100vh - 52px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.param-setup-page .ao-main-wrap {
+  min-height: 0;
+}
+
+.param-setup-page .ao-main {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #f7f8fa;
+}
+
+.param-setup-host {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px 24px;
+  box-sizing: border-box;
+}
+
+/* The tool's content renders as a white card on the gray canvas. */
+.param-setup-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e6e8eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}

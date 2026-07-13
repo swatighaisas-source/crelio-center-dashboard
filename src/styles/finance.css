@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════
+   Finance — Account List  (.fin-acct-*)
+═══════════════════════════════════════════════════════════ */
+
+.fin-acct-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.fin-acct-banner {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%);
+  border-bottom: 1px solid #e6edf2;
+}
+
+.fin-acct-banner__title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.fin-acct-banner__text {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.fin-acct-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.fin-acct-toolbar__search {
+  flex: 1;
+  max-width: 420px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #374151;
+  border: 1px solid #d9dde3;
+  border-radius: 3px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.fin-acct-toolbar__search:focus {
+  outline: none;
+  border-color: #3b71ca;
+  box-shadow: 0 0 0 2px rgba(59, 113, 202, 0.12);
+}
+
+.fin-acct-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.fin-acct-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fin-acct-btn--outline {
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d9dde3;
+}
+
+.fin-acct-btn--outline:hover {
+  border-color: #b8bec6;
+}
+
+.fin-acct-btn--primary {
+  color: #ffffff;
+  background: #1777bf;
+  border: 1px solid #1777bf;
+}
+
+.fin-acct-btn--primary:hover {
+  background: #1e88d8;
+  border-color: #1e88d8;
+}
+
+.fin-acct-tabs {
+  display: flex;
+  gap: 24px;
+  flex-shrink: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid #e6edf2;
+}
+
+.fin-acct-tab {
+  position: relative;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.fin-acct-tab--active {
+  color: #1e9bd0;
+}
+
+.fin-acct-tab--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #1e9bd0;
+}
+
+.fin-acct-table-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  background: #ffffff;
+}
+
+.fin-acct-table-card__count {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.fin-acct-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid #e6edf2;
+}
+
+.fin-acct-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.fin-acct-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fafc;
+}
+
+.fin-acct-table th,
+.fin-acct-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e6edf2;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-acct-table th {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.fin-acct-table__filter {
+  margin-left: 4px;
+  font-size: 9px;
+  color: #9aa3ad;
+}
+
+.fin-acct-table th:nth-child(1) {
+  width: 16%;
+}
+
+.fin-acct-table th:nth-child(2) {
+  width: 10%;
+}
+
+.fin-acct-table th:nth-child(3) {
+  width: 14%;
+}
+
+.fin-acct-table th:nth-child(4),
+.fin-acct-table th:nth-child(5) {
+  width: 9%;
+}
+
+.fin-acct-table th:nth-child(6) {
+  width: 10%;
+}
+
+.fin-acct-table th:nth-child(7) {
+  width: 12%;
+}
+
+.fin-acct-table th:nth-child(8) {
+  width: 10%;
+}
+
+.fin-acct-table th:nth-child(9) {
+  width: 8%;
+}
+
+.fin-acct-table__actions-col {
+  width: 44px;
+  text-align: center;
+}
+
+.fin-acct-table__name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.fin-acct-table__email {
+  color: #4b5563;
+}
+
+.fin-acct-table__credit {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.fin-acct-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #237804;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 3px;
+}
+
+.fin-acct-table__actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.fin-acct-table__actions:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.fin-acct-table__empty {
+  padding: 24px 16px !important;
+  text-align: center;
+  color: #6b7280;
+}
