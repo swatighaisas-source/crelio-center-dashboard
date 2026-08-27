@@ -345,8 +345,11 @@ function ModuleInlineNav({
   moduleId: LabModuleId;
   pathname: string;
 }) {
-  const groups = getModuleNavGroups(moduleId);
-  const flatRegistrationNav = moduleId === "registration" ? getRegistrationFlatNav() : [];
+  const groups = useMemo(() => getModuleNavGroups(moduleId), [moduleId]);
+  const flatRegistrationNav = useMemo(
+    () => (moduleId === "registration" ? getRegistrationFlatNav() : []),
+    [moduleId],
+  );
 
   const inlineChildren = useMemo(() => {
     if (moduleId === "registration") return null;
@@ -398,13 +401,22 @@ function ModuleInlineNav({
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set(activeGroupIds));
   const [expandedNested, setExpandedNested] = useState<Set<string>>(() => new Set(activeNestedIds));
 
-  useEffect(() => {
-    setExpandedGroups(new Set(activeGroupIds));
-  }, [moduleId, pathname, activeGroupIds]);
+  const activeNestedKey = useMemo(
+    () => Array.from(activeNestedIds).sort().join(","),
+    [activeNestedIds],
+  );
+  const activeGroupKey = useMemo(
+    () => Array.from(activeGroupIds).sort().join(","),
+    [activeGroupIds],
+  );
 
   useEffect(() => {
-    setExpandedNested(new Set(activeNestedIds));
-  }, [moduleId, pathname, activeNestedIds]);
+    setExpandedGroups(new Set(activeGroupKey ? activeGroupKey.split(",") : []));
+  }, [moduleId, pathname, activeGroupKey]);
+
+  useEffect(() => {
+    setExpandedNested(new Set(activeNestedKey ? activeNestedKey.split(",") : []));
+  }, [moduleId, pathname, activeNestedKey]);
 
   if (moduleId === "registration") {
     return <RegistrationNavSection labId={labId} pathname={pathname} />;

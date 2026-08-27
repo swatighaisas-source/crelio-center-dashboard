@@ -22,7 +22,7 @@ export interface PaymentModeRow {
 }
 
 export const FIELD_REQUIREMENT_OPTIONS: { value: FieldRequirement; label: string }[] = [
-  { value: "mandatory", label: "Mandatory" },
+  { value: "mandatory", label: "Required" },
   { value: "optional", label: "Optional" },
 ];
 
@@ -71,7 +71,7 @@ export function getPaymentModeRequirements(
 }
 
 export function fieldRequirementPlaceholder(requirement: FieldRequirement): string {
-  return requirement === "mandatory" ? "Mandatory" : "Optional";
+  return requirement === "mandatory" ? "Required" : "Optional";
 }
 
 export interface PaymentFieldErrors {

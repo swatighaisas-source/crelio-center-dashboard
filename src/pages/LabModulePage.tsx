@@ -10,7 +10,7 @@ import {
 import { useSyncedPathname } from "../hooks/useSyncedPathname";
 import { ModuleNavSidebar } from "../components/lab-shell/ModuleNavSidebar";
 import { ModulePlaceholder } from "../components/lab-shell/ModulePlaceholder";
-import { InflowOperationWorkspace } from "../components/inflow/InflowOperationWorkspace";
+import { InflowCancelledReportsWorkspace, InflowDismissReportsWorkspace, InflowOperationWorkspace } from "../components/inflow/InflowOperationWorkspace";
 import { OrderHistoryPage } from "../components/inflow/OrderHistoryPage";
 import { PendingCollectionPage } from "../components/inflow/PendingCollectionPage";
 import { SampleListPage } from "../components/inflow/SampleListPage";
@@ -111,6 +111,14 @@ function ModuleMainContent({
 
   if (moduleId === "operation" && (section === "" || section === "waiting-list")) {
     return <InflowOperationWorkspace />;
+  }
+
+  if (moduleId === "operation" && section === "dismiss-reports") {
+    return <InflowDismissReportsWorkspace />;
+  }
+
+  if (moduleId === "operation" && section === "cancelled-reports") {
+    return <InflowCancelledReportsWorkspace />;
   }
 
   if (moduleId === "accession" && section === "sample-list") {

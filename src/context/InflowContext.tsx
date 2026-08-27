@@ -9,6 +9,13 @@ import {
 import { useParams } from "react-router-dom";
 import type { ExceptionRecord, ExceptionSourceLevel } from "../data/inflow/exceptionTypes";
 import {
+  canDismissReport,
+  canRestoreReport,
+  emptyDismissSummary,
+  type DismissReportInput,
+  type DismissReportSummary,
+} from "../data/inflow/dismissReport";
+import {
   createInflowNotifications,
   type InflowNotification,
   type InflowNotificationEvent,
@@ -49,6 +56,7 @@ import {
   getUserByName,
   userCanAccessTask,
 } from "../lib/inflow/taskAccess";
+import { isDismissReportPermissionEnabled } from "../data/centerUserRoles";
 
 type SelectionState = {
   selectedOrderId: number | null;
@@ -124,6 +132,9 @@ export type InflowContextValue = {
   ) => void;
   collectSample: (sampleId: string) => void;
   splitSampleForRedraw: (sampleId: string, selectedServices: string[], comment: string) => void;
+  dismissReports: (input: DismissReportInput) => DismissReportSummary;
+  restoreReport: (reportId: string) => { ok: boolean; reason?: string };
+  canDismissReports: boolean;
   updateTaskAssignee: (taskId: string, assignee: TaskAssignee) => void;
   addTaskComment: (taskId: string, text: string, internal: boolean, attachments?: boolean) => void;
   resolveTask: (taskId: string) => void;
@@ -503,6 +514,150 @@ export function InflowProvider({ children }: { children: ReactNode }) {
         original.accountName,
       );
     },
+    dismissReports: (input) => {
+      const summary = emptyDismissSummary(input.reportIds.length);
+      if (!isLabUser || !isDismissReportPermissionEnabled()) {
+        for (const reportId of input.reportIds) {
+          const report = state.reports.find((item) => item.id === reportId);
+          summary.failed.push({
+            reportId,
+            accessionNo: report?.accessionNo ?? "—",
+            service: report?.service ?? "—",
+            patientName: report?.patientName ?? "—",
+            reason: "You do not have permission to dismiss reports.",
+          });
+        }
+        return summary;
+      }
+
+      const reason = input.reason.trim();
+      if (!reason) {
+        for (const reportId of input.reportIds) {
+          const report = state.reports.find((item) => item.id === reportId);
+          summary.failed.push({
+            reportId,
+            accessionNo: report?.accessionNo ?? "—",
+            service: report?.service ?? "—",
+            patientName: report?.patientName ?? "—",
+            reason: "Dismiss reason is required.",
+          });
+        }
+        return summary;
+      }
+
+      const dismissedAt = new Date().toISOString();
+      const remarks = input.remarks.trim();
+      const succeedIds: string[] = [];
+
+      // Process independently so one failure does not block the rest.
+      for (const reportId of input.reportIds) {
+        const report = state.reports.find((item) => item.id === reportId);
+        const check = canDismissReport(report);
+        if (!report || !check.ok) {
+          summary.failed.push({
+            reportId,
+            accessionNo: report?.accessionNo ?? "—",
+            service: report?.service ?? "—",
+            patientName: report?.patientName ?? "—",
+            reason: check.reason ?? "Unable to dismiss this test.",
+          });
+          continue;
+        }
+
+        succeedIds.push(reportId);
+        summary.succeeded.push({
+          reportId: report.id,
+          accessionNo: report.accessionNo,
+          service: report.service,
+          patientName: report.patientName,
+        });
+      }
+
+      if (succeedIds.length > 0) {
+        const succeedSet = new Set(succeedIds);
+        patchState((current) => ({
+          ...current,
+          reports: current.reports.map((report) => {
+            if (!succeedSet.has(report.id)) return report;
+            return {
+              ...report,
+              status: "Dismissed" as const,
+              dismissal: {
+                reason,
+                remarks,
+                dismissedBy: input.dismissedBy,
+                dismissedAt,
+                source: input.source,
+              },
+            };
+          }),
+        }));
+
+        if (selection.selectedReportId && succeedSet.has(selection.selectedReportId)) {
+          setSelection({ selectedReportId: null });
+        }
+
+        // Downstream notification stub (mirrors existing task-watcher style alerts).
+        pushNotifications(
+          succeedIds.flatMap((reportId) => {
+            const report = state.reports.find((item) => item.id === reportId);
+            if (!report) return [];
+            return [
+              {
+                recipient: currentUser.assignee,
+                actor: input.dismissedBy,
+                tag: "REPORT DISMISSED",
+                title: `${input.dismissedBy} dismissed a report`,
+                detail: `${report.service} · ${report.accessionNo} · ${input.source}`,
+                type: "Report" as const,
+                entityType: "report" as const,
+                entityId: report.id,
+              },
+            ];
+          }),
+        );
+      }
+
+      return summary;
+    },
+    restoreReport: (reportId) => {
+      if (!isLabUser || !isDismissReportPermissionEnabled()) {
+        return { ok: false, reason: "You do not have permission to restore reports." };
+      }
+      const report = state.reports.find((item) => item.id === reportId);
+      const check = canRestoreReport(report);
+      if (!report || !check.ok) {
+        return { ok: false, reason: check.reason ?? "Unable to restore this report." };
+      }
+
+      patchState((current) => ({
+        ...current,
+        reports: current.reports.map((item) => {
+          if (item.id !== reportId) return item;
+          const { dismissal: _dismissal, ...rest } = item;
+          return {
+            ...rest,
+            status: "Received" as const,
+          };
+        }),
+      }));
+
+      pushNotifications([
+        {
+          recipient: currentUser.assignee,
+          actor: currentUser.assignee,
+          tag: "REPORT RESTORED",
+          title: `${currentUser.assignee} restored a report`,
+          detail: `${report.service} · ${report.accessionNo}`,
+          type: "Report",
+          entityType: "report",
+          entityId: report.id,
+        },
+      ]);
+
+      return { ok: true };
+    },
+    canDismissReports: isLabUser && isDismissReportPermissionEnabled(),
     updateTaskAssignee: (taskId, assignee) => {
       if (!isLabUser || assignee.role !== "lab") return;
       const currentTask = state.tasks.find((task) => task.id === taskId);

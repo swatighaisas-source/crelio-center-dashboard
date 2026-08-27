@@ -45,6 +45,18 @@ export function OperationNavIcon({ id, active }: { id: OperationNavIconId; activ
             <path d="M8 6h2M8 9h2M8 12h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </>
         )}
+        {id === "dismiss" && (
+          <>
+            <path d="M5 5l8 8M13 5L5 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            <rect x="3.5" y="3.5" width="11" height="11" rx="2" {...stroke} />
+          </>
+        )}
+        {id === "cancelled" && (
+          <>
+            <circle cx="9" cy="9" r="6.5" {...stroke} />
+            <path d="M6.5 9h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
         {id === "archive" && (
           <>
             <rect x="3" y="4" width="12" height="10" rx="1.5" {...stroke} />

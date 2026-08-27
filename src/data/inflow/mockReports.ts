@@ -1,7 +1,15 @@
 import { mockOrders, type ExceptionActivity, type ExceptionKey } from "./mockOrders";
 import { mockSamples } from "./mockSamples";
 
-export type ReportStatus = "Received" | "Dispatched";
+export type ReportStatus = "Received" | "Dispatched" | "Dismissed";
+
+export type ReportDismissal = {
+  reason: string;
+  remarks: string;
+  dismissedBy: string;
+  dismissedAt: string;
+  source: "Dismiss Report" | "Bulk Dismiss";
+};
 
 export type Report = {
   id: string;
@@ -27,6 +35,7 @@ export type Report = {
     active: ExceptionKey[];
     activity: ExceptionActivity[];
   };
+  dismissal?: ReportDismissal;
 };
 
 export const mockReports: Report[] = mockSamples.flatMap((sample, sampleIndex) => {

@@ -263,3 +263,9 @@ export function selectUserRoleHref(labId: number): string {
 export function addUserDetailsHref(labId: number, roleId: string): string {
   return `/lab/${labId}/center/users/new/${roleId}`;
 }
+
+/** Default Operation Actions permission for dismissing reports (role stub). */
+export function isDismissReportPermissionEnabled(): boolean {
+  const group = OPERATION_FEATURE_GROUPS.find((item) => item.id === "operation-actions");
+  return group?.permissions.find((item) => item.id === "dismiss-report")?.enabled ?? false;
+}

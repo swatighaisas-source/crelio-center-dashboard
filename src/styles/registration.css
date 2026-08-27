@@ -1471,7 +1471,7 @@
 }
 
 .pay-modes-table col.pay-modes-table__col-visible {
-  width: 72px;
+  width: 100px;
 }
 
 .pay-modes-table col.pay-modes-table__col-actions {
@@ -1481,7 +1481,7 @@
 .pay-modes-table thead {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   background: #f3f4f6;
 }
 
@@ -1498,6 +1498,64 @@
   font-weight: 600;
   color: #374151;
   line-height: 1.3;
+}
+
+.pay-modes-table__th-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pay-modes-table__info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: help;
+}
+
+.pay-modes-table__info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #3b71ca;
+  color: #3b71ca;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  background: #fff;
+}
+
+.pay-modes-table__tooltip {
+  width: 260px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #1f2937;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.pay-modes-table__tooltip--portal {
+  position: fixed;
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.pay-modes-table th.pay-modes-table__col-visible {
+  overflow: visible;
 }
 
 .pay-modes-table th.pay-modes-table__col-mode,

@@ -319,6 +319,63 @@
   color: #374151;
 }
 
+.dismiss-reports-search {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+
+.dismiss-reports-search .op-toolbar__search-wrap {
+  flex: 0 1 50%;
+  max-width: 50%;
+}
+
+.dismiss-reports-search .op-toolbar__search {
+  padding-right: 108px;
+}
+
+.dismiss-reports-search .op-toolbar__shortcut {
+  right: 70px;
+  padding: 1px 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.dismiss-reports-search .op-toolbar__search-btn {
+  right: 36px;
+}
+
+.dismiss-reports-search .op-toolbar__search-divider {
+  position: absolute;
+  right: 34px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: #e5e7eb;
+}
+
+.dismiss-reports-search .op-toolbar__barcode-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.dismiss-reports-search .op-toolbar__barcode-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
 .op-toolbar__actions {
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAccountManagement } from "../../context/AccountManagementContext";
 import { usePaymentModes } from "../../context/PaymentModesContext";
 import {
@@ -11,6 +12,9 @@ import {
 } from "../../data/paymentModes";
 import { PaymentModeTransferModal } from "./PaymentModeTransferModal";
 
+const SELECTABLE_INFO_TEXT =
+  "Only payment modes with this flag enabled will be available for selection in payment mode dropdowns throughout the application.";
+
 interface Props {
   labId: number;
   open: boolean;
@@ -20,6 +24,59 @@ interface Props {
 interface PendingDisable {
   rowId: string;
   modeName: string;
+}
+
+function SelectableInfoTip() {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) {
+      setPos(null);
+      return;
+    }
+    const rect = triggerRef.current.getBoundingClientRect();
+    const tooltipWidth = 260;
+    const left = Math.min(rect.left, window.innerWidth - tooltipWidth - 12);
+    setPos({
+      top: rect.bottom + 8,
+      left: Math.max(12, left),
+    });
+  }, [open]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="pay-modes-table__info"
+        aria-label={SELECTABLE_INFO_TEXT}
+        aria-describedby={open ? "pay-modes-selectable-tip" : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+      >
+        <span className="pay-modes-table__info-icon" aria-hidden="true">
+          i
+        </span>
+      </button>
+      {open && pos
+        ? createPortal(
+            <span
+              id="pay-modes-selectable-tip"
+              className="pay-modes-table__tooltip pay-modes-table__tooltip--portal"
+              role="tooltip"
+              style={{ top: pos.top, left: pos.left }}
+            >
+              {SELECTABLE_INFO_TEXT}
+            </span>,
+            document.body,
+          )
+        : null}
+    </>
+  );
 }
 
 function TrashIcon() {
@@ -240,7 +297,12 @@ export function ManagePaymentModesModal({ labId, open, onClose }: Props) {
                       <th className="pay-modes-table__col-mode">Payment Mode</th>
                       <th className="pay-modes-table__col-transaction">Transaction ID</th>
                       <th className="pay-modes-table__col-bank">Bank Details/Comments</th>
-                      <th className="pay-modes-table__col-visible">Visible</th>
+                      <th className="pay-modes-table__col-visible">
+                        <span className="pay-modes-table__th-label">
+                          Selectable
+                          <SelectableInfoTip />
+                        </span>
+                      </th>
                       <th className="pay-modes-table__actions-col" aria-label="Actions" />
                     </tr>
                   </thead>
@@ -281,7 +343,7 @@ export function ManagePaymentModesModal({ labId, open, onClose }: Props) {
                           <TableToggle
                             on={row.showToLab}
                             onChange={(value) => handleVisibilityChange(row, value)}
-                            label={`${row.name || "Payment mode"} visible`}
+                            label={`${row.name || "Payment mode"} selectable`}
                           />
                         </td>
                         <td className="pay-modes-table__actions-col">

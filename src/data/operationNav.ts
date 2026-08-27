@@ -5,6 +5,8 @@ export type OperationNavIconId =
   | "callout"
   | "device"
   | "pcr"
+  | "dismiss"
+  | "cancelled"
   | "archive"
   | "status"
   | "print"
@@ -41,6 +43,7 @@ export const WAITING_LIST_SUB_NAV: OperationNavLeaf[] = [
   { id: "validated", label: "Validated", path: "/validated", count: 0 },
   { id: "rejected", label: "Rejected", path: "/rejected", count: 0 },
   { id: "on-hold", label: "On Hold", path: "/on-hold", count: 0 },
+  { id: "cancelled-reports", label: "Cancelled Reports", path: "/cancelled-reports" },
 ];
 
 export const OPERATION_NAV: OperationNavItem[] = [
@@ -59,6 +62,7 @@ export const OPERATION_NAV: OperationNavItem[] = [
       { id: "critical-callout", label: "Critical Callout Worklist", path: "/critical-callout" },
       { id: "device-validation", label: "Device Results Validation", path: "/device-validation", badge: "Beta" },
       { id: "rt-pcr", label: "RT-PCR Plating", path: "/rt-pcr-plating" },
+      { id: "dismiss-reports", label: "Dismiss Reports", path: "/dismiss-reports", badge: "New" },
       { id: "archives", label: "Archives", path: "/archives" },
       { id: "service-status", label: "Operation / Service Status", path: "/service-status" },
       { id: "report-prints", label: "Report Prints", path: "/report-prints" },
