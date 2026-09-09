@@ -239,7 +239,9 @@ function RegistrationNavSection({
       {REGISTRATION_NAV.map((item) => {
         if (item.children) {
           const expanded = expandedGroups.has(item.id);
-          const hubChild = item.children.find((c) => c.path === "") ?? item.children[0];
+          const hubChild = item.children.find((c) => c.path === "");
+          const triggerLabel =
+            item.id === "registration" && hubChild ? hubChild.label : item.label;
           const groupActive =
             expanded ||
             item.children.some((child) => {
@@ -268,7 +270,7 @@ function RegistrationNavSection({
                 aria-expanded={expanded}
               >
                 <RegistrationNavIcon id={item.icon} active={groupActive} />
-                <span className="ao-nav-item__label">{hubChild.label}</span>
+                <span className="ao-nav-item__label">{triggerLabel}</span>
                 <Chevron up={expanded} />
               </button>
               {expanded && (

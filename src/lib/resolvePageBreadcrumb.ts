@@ -2,6 +2,7 @@ import {
   CLIENT_PRICING_NAV_ID,
   CLIENT_PRICING_SECTION_IDS,
   getSectionPage,
+  LAB_FORMS_MANAGEMENT_SECTION_IDS,
   OTHER_SETTINGS_SECTION_IDS,
   TEST_MASTER_NAV_ID,
   TEST_MASTER_SECTION_IDS,
@@ -93,6 +94,17 @@ function resolveCenterSectionBreadcrumb(labId: number, sectionId: SectionPageId)
       backLabel: isClientPricingRoot
         ? "Back to Lab Settings"
         : "Back to Client & Insurance Pricing",
+      segments,
+    };
+  }
+
+  if (LAB_FORMS_MANAGEMENT_SECTION_IDS.has(sectionId as "aoe-configuration" | "consent-form-configuration" | "additional-patient-info")) {
+    segments.push({ label: "Lab Forms Management" });
+    segments.push({ label: sectionMeta.title });
+    return {
+      title: sectionMeta.title,
+      backHref: labSettingsHref(labId),
+      backLabel: "Back to Lab Settings",
       segments,
     };
   }
@@ -237,6 +249,25 @@ export function resolvePageBreadcrumb(
         };
       }
       return resolveCenterSectionBreadcrumb(labId, "parameter-setup");
+    }
+
+    if (sectionId === "aoe-configuration") {
+      const listHref = `/lab/${labId}/center/aoe-configuration`;
+      const sub = centerPath.slice("aoe-configuration".length).replace(/^\//, "");
+      if (sub) {
+        return {
+          title: "Edit AOE Form Configuration",
+          backHref: listHref,
+          backLabel: "Back to AOE Configuration",
+          segments: [
+            { label: "Lab Settings", href: labSettingsHref(labId) },
+            { label: "Lab Forms Management" },
+            { label: "AOE Configuration", href: listHref },
+            { label: "Edit AOE Form Configuration" },
+          ],
+        };
+      }
+      return resolveCenterSectionBreadcrumb(labId, "aoe-configuration");
     }
 
     const sectionMeta = getSectionPage(sectionId);

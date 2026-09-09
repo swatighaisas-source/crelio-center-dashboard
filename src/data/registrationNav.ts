@@ -46,7 +46,29 @@ export const REGISTRATION_NAV: RegistrationNavItem[] = [
   { id: "home-collection", label: "Home Collection", icon: "home" },
   { id: "pending-collection", label: "Pending Collection", icon: "collection" },
   { id: "order-history", label: "Order History", icon: "history" },
-  { id: "lab-forms-history", label: "Lab Forms History", icon: "forms" },
+  {
+    id: "lab-forms-history",
+    label: "Lab Forms History",
+    icon: "forms",
+    chevron: "down",
+    children: [
+      {
+        id: "consent-history",
+        label: "Consent History",
+        path: "lab-forms-history/consent-history",
+      },
+      {
+        id: "aoe-history",
+        label: "AOE History",
+        path: "lab-forms-history/aoe-history",
+      },
+      {
+        id: "patient-info-history",
+        label: "Patient Info History",
+        path: "lab-forms-history/patient-info-history",
+      },
+    ],
+  },
   { id: "cash-transfer", label: "Cash Transfer", icon: "cash" },
   { id: "financial-reports", label: "Financial Reports", icon: "finance" },
   { id: "archives", label: "Archives", icon: "archive" },

@@ -4,6 +4,7 @@ import { InflowProvider } from "../../context/InflowContext";
 import { PaymentModesProvider } from "../../context/PaymentModesContext";
 import { OrderPaymentListProvider } from "../../context/OrderPaymentListContext";
 import { AccountManagementProvider } from "../../context/AccountManagementContext";
+import { LabAoeConfigProvider } from "../../context/LabAoeConfigContext";
 import { InflowModalsHost } from "../inflow/InflowModalsHost";
 import { GlobalTopBar } from "./GlobalTopBar";
 
@@ -41,6 +42,7 @@ export function LabDashboardLayout() {
       <PaymentModesProvider>
         <OrderPaymentListProvider>
           <AccountManagementProvider>
+            <LabAoeConfigProvider>
             <InflowProvider>
               <div className={`lab-shell${collapsed ? " lab-shell--sidebar-collapsed" : ""}`}>
                 <GlobalTopBar />
@@ -48,6 +50,7 @@ export function LabDashboardLayout() {
                 <InflowModalsHost />
               </div>
             </InflowProvider>
+            </LabAoeConfigProvider>
           </AccountManagementProvider>
         </OrderPaymentListProvider>
       </PaymentModesProvider>

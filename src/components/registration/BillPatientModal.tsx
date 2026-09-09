@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useInflow } from "../../context/InflowContext";
+import { useLabAoeConfig } from "../../context/LabAoeConfigContext";
 import { useOrderPaymentList } from "../../context/OrderPaymentListContext";
 import { usePaymentModes } from "../../context/PaymentModesContext";
+import type { BillLineItem } from "../../data/aoeTypes";
+import {
+  BILL_TEST_CATALOG,
+  createDefaultBillLineItems,
+  findCatalogTest,
+} from "../../data/billTests";
+import { sectionHref } from "../../data/labModules";
 import {
   formatPaymentModeLabel,
   paymentModeRequiresDetails,
@@ -10,6 +20,21 @@ import {
   getTotalPaymentAmount,
   type PaymentListEntry,
 } from "../../data/paymentList";
+import { getAoeCompletionMessage, isBillAoeComplete } from "../../lib/aoe/aoeCompletion";
+import {
+  addTestToBill,
+  handleRemoveLineItemWithAoeCleanup,
+  moveLineItemDown,
+  moveLineItemUp,
+  updateLineItemQty,
+} from "../../lib/aoe/aoeLifecycle";
+import { copyBillAoeAnswers, getBillAoeAnswers } from "../../lib/aoe/aoeResponseStore";
+import { getValidationSummary, validateBillAoe } from "../../lib/aoe/aoeValidation";
+import {
+  buildOrderFromBillLineItems,
+  nextOrderId,
+} from "../../lib/aoe/orderAoeAdapter";
+import { AoeForBillModal } from "./aoe/AoeForBillModal";
 import { PaymentListModal } from "./PaymentListModal";
 
 interface Props {
@@ -19,8 +44,17 @@ interface Props {
 }
 
 const BILL_SOURCES = ["Self Pay", "Insurance", "Org Pay"] as const;
-const PAYABLE_AMOUNT = 101;
 const PATIENT_DUE = 908;
+
+const PATIENT_CONTEXT = {
+  name: "swati (F - 0 years)",
+  id: "33506",
+  ref: "IpId-4633",
+  contact: "91 9898789878",
+  referral: "test-ref-2",
+  organisation: "Saturn (Training)",
+  previousReportOn: "28th May, 2026 12:14 pm",
+};
 
 function ChevronDown() {
   return (
@@ -36,23 +70,59 @@ function ChevronDown() {
   );
 }
 
+function formatCurrency(amount: number) {
+  return `₹ ${amount.toFixed(2)}`;
+}
+
 export function BillPatientModal({ labId, open, onClose }: Props) {
+  const navigate = useNavigate();
+  const { createOrder, orders, setSelectedOrderId } = useInflow();
   const { paymentModes, visiblePaymentModeOptions } = usePaymentModes(labId);
-  const billDraftId = useMemo(() => getRegistrationBillDraftOrderId(labId), [labId]);
+  const { captureFrequency } = useLabAoeConfig(labId);
+  const billDraftOrderId = useMemo(() => getRegistrationBillDraftOrderId(labId), [labId]);
+  const billDraftId = useMemo(() => String(billDraftOrderId), [billDraftOrderId]);
   const [selectedSource, setSelectedSource] = useState<(typeof BILL_SOURCES)[number]>("Self Pay");
   const [selectedMode, setSelectedMode] = useState("");
-  const [moreOpen, setMoreOpen] = useState(false);
   const [paymentListOpen, setPaymentListOpen] = useState(false);
   const [prefillMode, setPrefillMode] = useState<string | undefined>();
   const [paymentListSession, setPaymentListSession] = useState(0);
+  const [lineItems, setLineItems] = useState<BillLineItem[]>(() => createDefaultBillLineItems());
+  const [aoeModalOpen, setAoeModalOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const wasOpenRef = useRef(false);
 
-  const { savedPayments } = useOrderPaymentList(labId, billDraftId);
+  const { savedPayments } = useOrderPaymentList(labId, billDraftOrderId);
+
+  const testAmount = useMemo(
+    () =>
+      lineItems.reduce(
+        (sum, item) => sum + item.price * item.qty - item.concession,
+        0,
+      ),
+    [lineItems],
+  );
+
+  const answers = useMemo(
+    () => getBillAoeAnswers(labId, billDraftId, lineItems),
+    [labId, billDraftId, lineItems, aoeModalOpen],
+  );
+
+  const aoeComplete = useMemo(
+    () => isBillAoeComplete(lineItems, captureFrequency, answers),
+    [lineItems, captureFrequency, answers],
+  );
+
+  const aoeStatus = useMemo(
+    () => validateBillAoe(lineItems, captureFrequency, answers),
+    [lineItems, captureFrequency, answers],
+  );
 
   useEffect(() => {
     if (!open) {
       wasOpenRef.current = false;
       setPaymentListOpen(false);
+      setAoeModalOpen(false);
       return;
     }
     if (wasOpenRef.current) return;
@@ -64,25 +134,31 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
         visiblePaymentModeOptions[0]?.value ??
         "",
     );
-    setMoreOpen(false);
     setPaymentListOpen(false);
     setPrefillMode(undefined);
+    setLineItems(createDefaultBillLineItems());
+    setConfirmError(null);
+    setToast(null);
   }, [open, savedPayments, visiblePaymentModeOptions]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
   const primaryModes = visiblePaymentModeOptions.slice(0, 3);
-  const moreModes = visiblePaymentModeOptions.slice(3);
 
   const paidTotal = useMemo(() => getTotalPaymentAmount(savedPayments), [savedPayments]);
-  const remaining = Math.max(PAYABLE_AMOUNT - paidTotal, 0);
+  const remaining = Math.max(testAmount - paidTotal, 0);
 
-  const activeModeLabel = selectedMode
-    ? formatPaymentModeLabel(selectedMode)
-    : formatPaymentModeLabel(visiblePaymentModeOptions[0]?.value ?? "Cash");
+  const suggestedTests = BILL_TEST_CATALOG.filter((test) =>
+    ["test-ammonia", "test-afp"].includes(test.testId),
+  );
 
   function handleModeSelect(mode: string, event?: MouseEvent) {
     event?.stopPropagation();
     setSelectedMode(mode);
-    setMoreOpen(false);
     if (paymentModeRequiresDetails(paymentModes, mode)) {
       setPrefillMode(mode);
       setPaymentListSession((session) => session + 1);
@@ -102,6 +178,72 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
       setSelectedMode(entries[entries.length - 1].paymentMode);
     }
   }
+
+  function handleAddTest(testId: string) {
+    setLineItems((items) => addTestToBill(items, testId));
+  }
+
+  function handleRemoveLineItem(lineItemId: string) {
+    setLineItems((items) =>
+      handleRemoveLineItemWithAoeCleanup(labId, billDraftId, items, lineItemId),
+    );
+  }
+
+  function handleQtyChange(lineItemId: string, rawQty: string) {
+    const qty = Number.parseInt(rawQty, 10);
+    if (Number.isNaN(qty)) return;
+    setLineItems((items) => updateLineItemQty(items, lineItemId, qty));
+  }
+
+  function handleConfirmBill() {
+    if (!aoeComplete && aoeStatus.pending.length > 0) {
+      setConfirmError(getValidationSummary(aoeStatus.pending));
+      return;
+    }
+    setConfirmError(null);
+
+    const orderId = nextOrderId(orders);
+    const order = buildOrderFromBillLineItems({
+      orderId,
+      lineItems,
+      patientName: "swati",
+      patientMeta: "F - 0 y",
+      provider: PATIENT_CONTEXT.referral,
+      source: selectedSource,
+      account: PATIENT_CONTEXT.organisation,
+    });
+    order.paymentHistory = savedPayments
+      .filter((entry) => Number.parseFloat(entry.amount) > 0)
+      .map((entry) => ({
+        mode: formatPaymentModeLabel(entry.paymentMode),
+        type: "Payment",
+        serviceName: lineItems.map((item) => item.testName).join(", ") || "—",
+        amount: Number.parseFloat(entry.amount) || 0,
+        transactionDate: order.orderDate,
+        collectedBy: "Registration",
+      }));
+    const paidTotalForOrder = getTotalPaymentAmount(savedPayments);
+    order.due = Math.max(order.amount - paidTotalForOrder, 0);
+    if (order.bills[0]) {
+      order.bills[0].paid = order.due <= 0;
+      order.bills[0].source = selectedSource;
+    }
+
+    createOrder(order);
+    copyBillAoeAnswers(labId, billDraftId, String(orderId));
+
+    onClose();
+    navigate(sectionHref(labId, "registration", "order-history"));
+    setSelectedOrderId(orderId);
+  }
+
+  function handleAoeComplete() {
+    setAoeModalOpen(true);
+  }
+
+  const activeModeLabel = selectedMode
+    ? formatPaymentModeLabel(selectedMode)
+    : formatPaymentModeLabel(visiblePaymentModeOptions[0]?.value ?? "Cash");
 
   if (!open) return null;
 
@@ -125,11 +267,11 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
             <div className="bill-patient-modal__times">
               <label>
                 Sample Collect Time
-                <input type="text" defaultValue="25/06/2026 10:48 AM" readOnly />
+                <input type="text" defaultValue="02/09/2026 12:28 PM" readOnly />
               </label>
               <label>
                 Bill Booking Time
-                <input type="text" defaultValue="25/06/2026 10:48 AM" readOnly />
+                <input type="text" defaultValue="02/09/2026 12:28 PM" readOnly />
               </label>
             </div>
             <button
@@ -146,35 +288,26 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
             <aside className="bill-patient-sidebar">
               <div className="bill-patient-sidebar__patient">
                 <div className="bill-patient-sidebar__name-row">
-                  <h3>Mr. Pranalitest (F - 4 Years)</h3>
-                  <span className="bill-patient-sidebar__badge">R</span>
+                  <h3>swati (F - 0 years)</h3>
                 </div>
-                <p className="bill-patient-sidebar__id">#22740</p>
+                <p className="bill-patient-sidebar__id">33506</p>
               </div>
               <dl className="bill-patient-sidebar__details">
                 <div>
                   <dt>Contact No</dt>
-                  <dd>+1 1234567890</dd>
-                </div>
-                <div>
-                  <dt>Email</dt>
-                  <dd>pranalitest@example.com</dd>
+                  <dd>91 9898789878</dd>
                 </div>
                 <div>
                   <dt>Referral</dt>
-                  <dd>NewojWd</dd>
+                  <dd>test-ref-2</dd>
                 </div>
                 <div>
                   <dt>Organisation</dt>
-                  <dd>cccount2</dd>
-                </div>
-                <div>
-                  <dt>National ID</dt>
-                  <dd>****1234</dd>
+                  <dd>Saturn (Training)</dd>
                 </div>
                 <div>
                   <dt>Previous Report On</dt>
-                  <dd>4th Jun, 2026 12:49 pm</dd>
+                  <dd>28th May, 2026 12:14 pm</dd>
                 </div>
               </dl>
             </aside>
@@ -203,17 +336,6 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
               </section>
 
               <section className="bill-patient-tests">
-                <div className="bill-patient-tests__tabs">
-                  <button type="button" className="bill-patient-tests__tab bill-patient-tests__tab--active">
-                    Search View
-                  </button>
-                  <button type="button" className="bill-patient-tests__tab">
-                    abc
-                  </button>
-                  <button type="button" className="bill-patient-tests__tab">
-                    nnnnn
-                  </button>
-                </div>
                 <table className="bill-patient-tests__table">
                   <thead>
                     <tr>
@@ -222,93 +344,112 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
                       <th>Qty</th>
                       <th>Price</th>
                       <th>Concession</th>
+                      <th aria-label="Actions" />
                     </tr>
                   </thead>
                   <tbody>
+                    {lineItems.map((item, index) => (
+                      <tr key={item.id}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <strong>{item.testName}</strong>
+                          <div className="bill-patient-tests__subtitle">
+                            {item.testName} - {item.testCode}
+                          </div>
+                          {item.hasAoe ? (
+                            <span className="bill-patient-tests__aoe-badge">AOE Required</span>
+                          ) : null}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min={1}
+                            className="bill-patient-tests__qty"
+                            value={item.qty}
+                            onChange={(e) => handleQtyChange(item.id, e.target.value)}
+                          />
+                        </td>
+                        <td>{formatCurrency(item.price * item.qty)}</td>
+                        <td>{formatCurrency(item.concession)}</td>
+                        <td className="bill-patient-tests__actions">
+                          <button
+                            type="button"
+                            className="bill-patient-tests__move"
+                            aria-label="Move up"
+                            onClick={() =>
+                              setLineItems((items) => moveLineItemUp(items, item.id))
+                            }
+                            disabled={index === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="bill-patient-tests__move"
+                            aria-label="Move down"
+                            onClick={() =>
+                              setLineItems((items) => moveLineItemDown(items, item.id))
+                            }
+                            disabled={index === lineItems.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="bill-patient-tests__remove"
+                            aria-label="Remove test"
+                            onClick={() => handleRemoveLineItem(item.id)}
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                     <tr>
-                      <td>1</td>
-                      <td>
-                        <strong>CBC</strong>
-                      </td>
-                      <td>
-                        <input type="text" defaultValue="1" readOnly className="bill-patient-tests__qty" />
-                      </td>
-                      <td>$ 101</td>
-                      <td>$ 0</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td colSpan={4}>
+                      <td>{lineItems.length + 1}</td>
+                      <td colSpan={5}>
                         <div className="bill-patient-tests__search">Search &amp; Select List</div>
+                        <div className="bill-patient-tests__suggested">
+                          <span>Suggested Tests</span>
+                          {suggestedTests.map((test) => (
+                            <button
+                              key={test.testId}
+                              type="button"
+                              className="bill-patient-tests__suggested-btn"
+                              onClick={() => handleAddTest(test.testId)}
+                            >
+                              {test.testName.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
-                <button type="button" className="bill-patient-tests__add">
-                  Add Test
-                </button>
               </section>
 
-              <section className="bill-patient-other">
-                <h3>Other Information</h3>
-                <div className="bill-patient-other__grid">
-                  <label>
-                    Order Number
-                    <input type="text" placeholder="Order Number" />
-                  </label>
-                  <label>
-                    Consulting Doctor
-                    <select defaultValue="">
-                      <option value="">Consulting Doctor</option>
-                    </select>
-                  </label>
-                </div>
-              </section>
+              {confirmError ? (
+                <p className="bill-patient-error" role="alert">
+                  {confirmError}
+                </p>
+              ) : null}
 
               <section className="bill-patient-payment">
                 <h3>Payment Information</h3>
                 <div className="bill-patient-payment__grid">
-                  <div className="bill-patient-payment__col">
-                    <label>
-                      Concession (IN $)
-                      <div className="bill-patient-payment__split">
-                        <select defaultValue="">
-                          <option value="">Select</option>
-                        </select>
-                        <input type="text" placeholder="0" />
-                      </div>
-                    </label>
-                    <label>
-                      Bill Additional Amount
-                      <input type="text" placeholder="0" />
-                    </label>
-                  </div>
-
                   <div className="bill-patient-payment__col bill-patient-payment__col--summary">
                     <p>
-                      <span>Test Amount:</span> <strong>$ {PAYABLE_AMOUNT}</strong>
+                      <span>Test Amount:</span> <strong>{formatCurrency(testAmount)}</strong>
                     </p>
                     <p>
-                      <span>Patient Due:</span> <strong>$ {PATIENT_DUE}</strong>
+                      <span>Patient Due:</span> <strong>{formatCurrency(PATIENT_DUE)}</strong>
                     </p>
-                    <label>
-                      Add Comment
-                      <textarea rows={3} placeholder="Add Comment" />
-                    </label>
-                    <label className="bill-patient-payment__checkbox">
-                      <input type="checkbox" />
-                      Same for Report
-                    </label>
                   </div>
 
                   <div className="bill-patient-payment__col bill-patient-payment__col--modes">
                     <p className="bill-patient-payment__payable">
-                      <span>Payable Amount:</span> <strong>$ {PAYABLE_AMOUNT}</strong>
+                      <span>Payable Amount:</span> <strong>{formatCurrency(testAmount)}</strong>
                     </p>
-                    <label>
-                      Advance Paid
-                      <input type="text" placeholder="Advance" />
-                    </label>
 
                     <div className="bill-patient-modes">
                       {primaryModes.map((mode) => (
@@ -323,42 +464,6 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
                           {mode.label}
                         </button>
                       ))}
-                      {moreModes.length > 0 ? (
-                        <div className="bill-patient-modes__more">
-                          <button
-                            type="button"
-                            className={`bill-patient-mode bill-patient-mode--more${
-                              moreModes.some((mode) => mode.value === selectedMode)
-                                ? " bill-patient-mode--active"
-                                : ""
-                            }`}
-                            onClick={() => setMoreOpen((open) => !open)}
-                            aria-expanded={moreOpen}
-                          >
-                            More
-                            <ChevronDown />
-                          </button>
-                          {moreOpen ? (
-                            <div className="bill-patient-modes__dropdown" role="menu">
-                              {moreModes.map((mode) => (
-                                <button
-                                  key={mode.value}
-                                  type="button"
-                                  role="menuitem"
-                                  className={
-                                    selectedMode === mode.value
-                                      ? "bill-patient-modes__dropdown-item--active"
-                                      : undefined
-                                  }
-                                  onClick={(event) => handleModeSelect(mode.value, event)}
-                                >
-                                  {mode.label}
-                                </button>
-                              ))}
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
                     </div>
 
                     <button
@@ -370,18 +475,10 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
                     </button>
 
                     <div className="bill-patient-payment__breakdown">
-                      {savedPayments.length > 0 ? (
-                        savedPayments.map((entry) => (
-                          <span key={entry.id}>
-                            {formatPaymentModeLabel(entry.paymentMode)} $ {entry.amount}
-                          </span>
-                        ))
-                      ) : (
-                        <span>
-                          {activeModeLabel} $ 0
-                        </span>
-                      )}
-                      <span>Remaining $ {remaining}</span>
+                      <span>
+                        {activeModeLabel} {formatCurrency(paidTotal)}
+                      </span>
+                      <span>Remaining {formatCurrency(remaining)}</span>
                     </div>
                   </div>
                 </div>
@@ -391,37 +488,65 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
             <aside className="bill-patient-pricelist">
               <h3>Price List Details</h3>
               <label>
+                Organisation Price List
+                <input type="search" placeholder="Search organisation price list" />
+              </label>
+              <label>
+                Referral Price List
+                <input type="search" placeholder="Search referral price list" />
+              </label>
+              <label>
                 Discount Price List
                 <input type="search" placeholder="Search discount price list" />
               </label>
-              <p className="bill-patient-pricelist__note">
-                Limited discount access, cannot change discount lists
-              </p>
             </aside>
           </div>
 
           <footer className="bill-patient-modal__footer">
-            <label className="bill-patient-modal__emergency">
-              <input type="checkbox" />
-              Emergency Report
-            </label>
             <div className="bill-patient-modal__footer-actions">
               <button type="button" className="bill-patient-btn bill-patient-btn--cancel" onClick={onClose}>
                 Cancel
               </button>
-              <button type="button" className="bill-patient-btn bill-patient-btn--confirm">
+              <button
+                type="button"
+                className={`bill-patient-btn bill-patient-btn--aoe${
+                  aoeComplete ? " bill-patient-btn--aoe-complete" : ""
+                }`}
+                onClick={handleAoeComplete}
+              >
+                {aoeComplete ? "AOE Complete" : "Complete AOE"}
+              </button>
+              <button
+                type="button"
+                className="bill-patient-btn bill-patient-btn--confirm"
+                onClick={handleConfirmBill}
+              >
                 Confirm and Bill
-                <span className="bill-patient-btn__hint">cmd+enter</span>
               </button>
             </div>
           </footer>
+
+          {toast ? <div className="bill-patient-toast">{toast}</div> : null}
         </div>
       </div>
+
+      <AoeForBillModal
+        labId={labId}
+        billId={billDraftId}
+        open={aoeModalOpen}
+        lineItems={lineItems}
+        frequency={captureFrequency}
+        patient={PATIENT_CONTEXT}
+        onClose={() => setAoeModalOpen(false)}
+        onComplete={() => {
+          setToast(getAoeCompletionMessage(lineItems, captureFrequency, answers));
+        }}
+      />
 
       <PaymentListModal
         key={paymentListSession}
         labId={labId}
-        orderId={billDraftId}
+        orderId={billDraftOrderId}
         open={paymentListOpen}
         onClose={() => {
           setPaymentListOpen(false);
@@ -434,3 +559,5 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
     </>
   );
 }
+
+export { findCatalogTest };

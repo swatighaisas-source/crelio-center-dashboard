@@ -11,6 +11,8 @@ import {
   type PaymentListEntry,
 } from "../../../data/paymentList";
 import { PaymentListModal } from "../../registration/PaymentListModal";
+import { AoeResponsesModal } from "./AoeResponsesModal";
+import { orderHasAoeServices } from "../../../lib/aoe/orderAoeAdapter";
 import { ExceptionSection } from "../ExceptionSection";
 
 type Props = {
@@ -46,6 +48,7 @@ export function OrderUpdateModal({
 }: Props) {
   const [activeBillId, setActiveBillId] = useState(order.bills[0]?.id ?? order.id);
   const [paymentListOpen, setPaymentListOpen] = useState(false);
+  const [aoeResponsesOpen, setAoeResponsesOpen] = useState(false);
   const { savedPayments, saveOrderPayments } = useOrderPaymentList(labId, order.id);
 
   useEffect(() => {
@@ -144,10 +147,10 @@ export function OrderUpdateModal({
                 <span>{index + 1}</span>
                 <span>
                   <strong>{service.name}</strong>
-                  {service.status ? <b>{service.status}</b> : null}
+                  {service.status ? <b>({service.status})</b> : null}
                   <small>{service.code}</small>
                 </span>
-                <input value="1" readOnly />
+                <input value={String(service.qty ?? 1)} readOnly />
                 <input placeholder="ICD Code" />
                 <span>{currency(service.price)} ✎</span>
                 <span>{currency(service.concession)} ✎</span>
@@ -252,16 +255,38 @@ export function OrderUpdateModal({
             )}
           </section>
 
-          <footer className="modal-footer">
-            <label><input type="checkbox" defaultChecked /> Bill Attachments</label>
-            <button>Print⌄</button>
-            <button onClick={() => onUpdate(order)}>Split Order</button>
-            <span />
-            <button className="danger">Cancel Bill</button>
-            <button className="primary">Confirm & Update</button>
+          <footer className="modal-footer modal-footer--order">
+            <div className="modal-footer__left">
+              <label className="modal-footer__attachments">
+                <input type="checkbox" defaultChecked /> Bill Attachments
+              </label>
+              <button type="button">Print⌄</button>
+            </div>
+            <div className="modal-footer__right">
+              <button type="button" className="danger">Cancel Bill</button>
+              {orderHasAoeServices(order.services) ? (
+                <button
+                  type="button"
+                  className="aoe-action"
+                  onClick={() => setAoeResponsesOpen(true)}
+                >
+                  View AOE
+                </button>
+              ) : null}
+              <button type="button" className="primary" onClick={() => onUpdate(order)}>
+                Confirm &amp; Update
+              </button>
+            </div>
           </footer>
         </div>
       </section>
+
+      <AoeResponsesModal
+        labId={labId}
+        order={order}
+        open={aoeResponsesOpen}
+        onClose={() => setAoeResponsesOpen(false)}
+      />
 
       <PaymentListModal
         labId={labId}

@@ -119,6 +119,12 @@ export const ADVANCE_SETTINGS_RIGHT: RegistrationSettingsCheckbox[] = [
   { id: "add-shared-referral", label: "Add Shared Referral", checked: true },
 ];
 
+import type { AoeCaptureFrequency } from "./aoeTypes";
+import { AOE_CAPTURE_FREQUENCY_OPTIONS, DEFAULT_AOE_CAPTURE_FREQUENCY } from "./aoeTypes";
+
+export { AOE_CAPTURE_FREQUENCY_OPTIONS, DEFAULT_AOE_CAPTURE_FREQUENCY };
+export type { AoeCaptureFrequency };
+
 export const REGISTRATION_VERSION_OPTIONS = ["Version 4", "Version 5 (Latest)"] as const;
 export const APPOINTMENT_VERSION_OPTIONS = ["Version 1", "Version 2"] as const;
 export const REGISTRATION_LAYOUT_OPTIONS = ["Default Form", "US Standard Form"] as const;

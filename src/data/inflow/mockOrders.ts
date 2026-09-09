@@ -24,7 +24,10 @@ export type ServiceLine = {
   id: string;
   name: string;
   code: string;
-  status?: "Dispatched";
+  testId?: string;
+  qty?: number;
+  hasAoe?: boolean;
+  status?: "Dispatched" | "Not Collected";
   price: number;
   concession: number;
 };
@@ -105,6 +108,48 @@ const billStack: Bill[] = [
 ];
 
 export const mockOrders: Order[] = [
+  {
+    id: 922639,
+    patient: "swati",
+    patientMeta: "F - 0 y",
+    provider: "test-ref-2",
+    source: "None (Default)",
+    account: "Saturn (Training)",
+    orderDate: "2nd Sep, 2026 03:00 pm",
+    sampleDate: "02/09/2026 03:00 PM",
+    amount: 798.6,
+    due: 798.6,
+    status: "Pending",
+    orderNumber: "IpId-4633",
+    comments: "AOE demo order with multi-instance Ammonia.",
+    services: [
+      {
+        id: "svc-ammonia-922639",
+        name: "Ammonia",
+        code: "BIOC012",
+        testId: "test-ammonia",
+        qty: 3,
+        hasAoe: true,
+        status: "Not Collected",
+        price: 0,
+        concession: 0,
+      },
+      {
+        id: "svc-dengue-922639",
+        name: "Dengue NS1",
+        code: "SERO045",
+        testId: "test-dengue-ns1",
+        qty: 1,
+        hasAoe: true,
+        status: "Not Collected",
+        price: 726,
+        concession: 0,
+      },
+    ],
+    bills: [{ id: 922639, date: "2nd Sep, 2026", source: "None (Default)", paid: false }],
+    paymentHistory: [],
+    exceptions: { active: [], activity: [] },
+  },
   {
     id: 117,
     patient: "Aarav Ledger",

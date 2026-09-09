@@ -5,6 +5,7 @@ import {
   getModuleIdFromPath,
   getModuleSectionPath,
   resolveModuleSectionTitle,
+  sectionHref,
   type LabModuleId,
 } from "../data/labModules";
 import { useSyncedPathname } from "../hooks/useSyncedPathname";
@@ -19,6 +20,7 @@ import { useInflow } from "../context/InflowContext";
 import { PatientRegistrationForm } from "../components/registration/PatientRegistrationForm";
 import { NgsAoePanel } from "../components/registration/NgsAoePanel";
 import { AccountListPage } from "../components/finance/AccountListPage";
+import { LabFormsHistoryPage } from "../components/registration/LabFormsHistoryPage";
 import { useLabs } from "../context/LabsContext";
 import "../styles/account-overview.css";
 import "../styles/module-layout.css";
@@ -107,6 +109,23 @@ function ModuleMainContent({
 
   if (moduleId === "registration" && (section === "order-history" || section === "pending-collection")) {
     return <RegistrationInflowSection section={section} />;
+  }
+
+  if (moduleId === "registration" && section === "lab-forms-history") {
+    return (
+      <Navigate
+        to={sectionHref(labId, "registration", "lab-forms-history/consent-history")}
+        replace
+      />
+    );
+  }
+
+  if (moduleId === "registration" && section.startsWith("lab-forms-history/")) {
+    return (
+      <div className="inflow-root">
+        <LabFormsHistoryPage section={section} />
+      </div>
+    );
   }
 
   if (moduleId === "operation" && (section === "" || section === "waiting-list")) {

@@ -117,6 +117,7 @@ export type InflowContextValue = {
   getTaskClientAccount: (task: LabTask) => string | null;
   userCanAccessTask: (task: LabTask, user?: TaskUser) => boolean;
   updateOrder: (order: Order) => void;
+  createOrder: (order: Order) => void;
   createException: (
     sourceLevel: ExceptionSourceLevel,
     sourceId: string,
@@ -473,6 +474,13 @@ export function InflowProvider({ children }: { children: ReactNode }) {
           type: "Order",
         }),
       );
+    },
+    createOrder: (order) => {
+      if (!isLabUser) return;
+      patchState((current) => ({
+        ...current,
+        orders: [order, ...current.orders.filter((existing) => existing.id !== order.id)],
+      }));
     },
     createException,
     resolveException,

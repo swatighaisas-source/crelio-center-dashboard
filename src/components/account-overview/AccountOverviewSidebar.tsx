@@ -11,6 +11,8 @@ import {
   CLIENT_PRICING_SECTION_IDS,
   TEST_MASTER_NAV_ID,
   TEST_MASTER_SECTION_IDS,
+  LAB_FORMS_MANAGEMENT_NAV_ID,
+  LAB_FORMS_MANAGEMENT_SECTION_IDS,
   OTHER_SETTINGS_SECTION_IDS,
 } from "../../data/accountOverview";
 import type { MainNavSectionId, NavItem } from "../../data/accountOverview";
@@ -106,6 +108,7 @@ export function AccountOverviewSidebar({ lab }: { lab: LabDetail }) {
   const [labSettingsExpanded, setLabSettingsExpanded] = useState(false);
   const [testMasterExpanded, setTestMasterExpanded] = useState(false);
   const [clientPricingExpanded, setClientPricingExpanded] = useState(false);
+  const [labFormsExpanded, setLabFormsExpanded] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const lifecycleState = getLabLifecycleState(lab.id);
@@ -155,6 +158,15 @@ export function AccountOverviewSidebar({ lab }: { lab: LabDetail }) {
   }, [location.pathname, lab.id]);
 
   useEffect(() => {
+    const onLabFormsRoute = [...LAB_FORMS_MANAGEMENT_SECTION_IDS].some(
+      (id) =>
+        location.pathname === `/lab/${lab.id}/center/${id}` ||
+        location.pathname.startsWith(`/lab/${lab.id}/center/${id}/`),
+    );
+    if (onLabFormsRoute) setLabFormsExpanded(true);
+  }, [location.pathname, lab.id]);
+
+  useEffect(() => {
     const onLabSettingsRoute = [...OTHER_SETTINGS_SECTION_IDS].some(
       (id) => location.pathname === `/lab/${lab.id}/center/${id}`,
     );
@@ -197,6 +209,7 @@ export function AccountOverviewSidebar({ lab }: { lab: LabDetail }) {
           const isLabSettings = item.id === LAB_SETTINGS_NAV_ID;
           const isTestMaster = item.id === TEST_MASTER_NAV_ID;
           const isClientPricing = item.id === CLIENT_PRICING_NAV_ID;
+          const isLabForms = item.id === LAB_FORMS_MANAGEMENT_NAV_ID;
           const isNavSection = MAIN_NAV_SECTION_IDS.has(item.id as MainNavSectionId);
           const isFlyoutRoot = isAdmin;
           const isOnboardingRoute =
@@ -222,12 +235,15 @@ export function AccountOverviewSidebar({ lab }: { lab: LabDetail }) {
                       ? testMasterExpanded
                       : isClientPricing
                         ? clientPricingExpanded
-                        : false
+                        : isLabForms
+                          ? labFormsExpanded
+                          : false
                 }
                 onToggle={() => {
                   if (isLabSettings) setLabSettingsExpanded((open) => !open);
                   if (isTestMaster) setTestMasterExpanded((open) => !open);
                   if (isClientPricing) setClientPricingExpanded((open) => !open);
+                  if (isLabForms) setLabFormsExpanded((open) => !open);
                 }}
               />
             );

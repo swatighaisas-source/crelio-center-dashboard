@@ -9,6 +9,7 @@ import { SubpageBreadcrumb } from "../components/lab-shell/SubpageBreadcrumb";
 import {
   CLIENT_PRICING_NAV_ID,
   CLIENT_PRICING_SECTION_IDS,
+  LAB_FORMS_MANAGEMENT_SECTION_IDS,
   getSectionPage,
   OTHER_SETTINGS_SECTION_IDS,
   TEST_MASTER_NAV_ID,
@@ -54,6 +55,9 @@ export function CenterSectionPage() {
   const isTestMasterRoot = section === TEST_MASTER_NAV_ID;
   const isClientPricingChild = CLIENT_PRICING_SECTION_IDS.has(section as ClientPricingSectionId);
   const isClientPricingRoot = section === CLIENT_PRICING_NAV_ID;
+  const isLabFormsChild = LAB_FORMS_MANAGEMENT_SECTION_IDS.has(
+    section as "aoe-configuration" | "consent-form-configuration" | "additional-patient-info",
+  );
 
   return (
     <div className="ao-layout">
@@ -100,7 +104,9 @@ export function CenterSectionPage() {
                     ? `This section is available under Test Master. Content for ${sectionMeta.title} will appear here.`
                     : isClientPricingChild || isClientPricingRoot
                       ? `This section is available under Client & Insurance Pricing. Content for ${sectionMeta.title} will appear here.`
-                      : `This section is available in Lab Settings. Content for ${sectionMeta.title} will appear here.`}
+                      : isLabFormsChild
+                        ? `This section is available under Lab Forms Management. Content for ${sectionMeta.title} will appear here.`
+                        : `This section is available in Lab Settings. Content for ${sectionMeta.title} will appear here.`}
               </p>
             </section>
           )}

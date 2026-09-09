@@ -29,6 +29,7 @@ import { CenterOnboardingPage } from "./pages/CenterOnboardingPage";
 import { CenterSectionPage } from "./pages/CenterSectionPage";
 import { ParameterSetupSectionPage } from "./pages/ParameterSetupSectionPage";
 import { ServiceListSectionPage } from "./pages/ServiceListSectionPage";
+import { AoeConfigurationSectionPage } from "./pages/AoeConfigurationSectionPage";
 import { CenterUserDetailPage } from "./pages/CenterUserDetailPage";
 import { CenterSelectUserRolePage } from "./pages/CenterSelectUserRolePage";
 import { CenterAddUserPage } from "./pages/CenterAddUserPage";
@@ -70,6 +71,14 @@ export default function App() {
             <Route
               path="/lab/:id/center/service-list/*"
               element={<ServiceListSectionPage />}
+            />
+            <Route
+              path="/lab/:id/center/aoe-configuration/:configId"
+              element={<AoeConfigurationSectionPage />}
+            />
+            <Route
+              path="/lab/:id/center/aoe-configuration"
+              element={<AoeConfigurationSectionPage />}
             />
             <Route path="/lab/:id/center/:section" element={<CenterSectionPage />} />
             <Route path="/lab/:id/center" element={<CenterManagementHubPage />} />

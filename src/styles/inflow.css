@@ -886,6 +886,71 @@ button {
   overflow: hidden;
 }
 
+.lab-forms-history {
+  height: calc(100vh - 42px);
+  overflow: hidden;
+  padding: 0 10px;
+  background: #fff;
+  border-left: 1px solid #dde5eb;
+}
+
+.lab-forms-history__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 0 6px;
+}
+
+.lab-forms-history__branches select {
+  min-width: 220px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #4d565d;
+  background: #fff;
+  border: 1px solid #d8e1e7;
+  border-radius: 3px;
+}
+
+.lab-forms-history__export {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #087bd0;
+  border: 1px solid #087bd0;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.lab-forms-history__date {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff;
+  border: 1px solid #e1e6eb;
+  border-radius: 3px;
+}
+
+.lab-forms-history__tabs {
+  height: 40px;
+  border-bottom: 1px solid #e6edf2;
+}
+
+.lab-forms-history__tabs .tab.active {
+  border-bottom: 2px solid #2583c7;
+}
+
+.lab-forms-history .table-card {
+  height: calc(100vh - 140px);
+}
+
 .report-list-page {
   min-height: calc(100vh - 42px);
   background: #fff;
@@ -2978,6 +3043,35 @@ tbody tr:hover {
   border-top: 1px solid #dfe7ed;
 }
 
+.modal-footer--order {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.modal-footer__left,
+.modal-footer__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-footer__attachments {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  color: #4c555d;
+  white-space: nowrap;
+}
+
+.modal-footer__right {
+  margin-left: auto;
+}
+
 .modal-footer button {
   height: 31px;
   border: 1px solid #b9c7d1;
@@ -2989,6 +3083,12 @@ tbody tr:hover {
 .modal-footer .danger {
   color: #c34257;
   border-color: #e1a6b2;
+}
+
+.modal-footer .aoe-action {
+  color: #fff;
+  background: #3b71ca;
+  border-color: #3b71ca;
 }
 
 .modal-footer .primary {

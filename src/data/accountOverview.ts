@@ -75,6 +75,7 @@ export interface NavItem {
 export const LAB_SETTINGS_NAV_ID = "lab-settings";
 export const TEST_MASTER_NAV_ID = "profile";
 export const CLIENT_PRICING_NAV_ID = "list-group";
+export const LAB_FORMS_MANAGEMENT_NAV_ID = "lab-forms-management";
 
 export type SectionPageId =
   | "overview"
@@ -101,6 +102,9 @@ export type SectionPageId =
   | "users"
   | "validator"
   | "lab-forms"
+  | "aoe-configuration"
+  | "consent-form-configuration"
+  | "additional-patient-info"
   | "custom-login"
   | "patient-feedback"
   | "instant-comments"
@@ -137,8 +141,18 @@ export type OtherSettingsSectionId = Extract<
   | "marketing"
   | "storage"
   | "translation"
-  | "lab-forms"
 >;
+
+export type LabFormsManagementSectionId = Extract<
+  SectionPageId,
+  "aoe-configuration" | "consent-form-configuration" | "additional-patient-info"
+>;
+
+export const LAB_FORMS_MANAGEMENT_SECTION_IDS = new Set<LabFormsManagementSectionId>([
+  "aoe-configuration",
+  "consent-form-configuration",
+  "additional-patient-info",
+]);
 
 export type TestMasterSectionId = Extract<
   SectionPageId,
@@ -176,12 +190,14 @@ export const CLIENT_PRICING_SECTION_IDS = new Set<ClientPricingSectionId>([
 export type MainNavSectionId =
   | TestMasterSectionId
   | ClientPricingSectionId
+  | LabFormsManagementSectionId
   | "integration"
   | "activity";
 
 export const MAIN_NAV_SECTION_IDS = new Set<MainNavSectionId>([
   ...TEST_MASTER_SECTION_IDS,
   ...CLIENT_PRICING_SECTION_IDS,
+  ...LAB_FORMS_MANAGEMENT_SECTION_IDS,
   "integration",
   "activity",
 ]);
@@ -380,6 +396,24 @@ const SECTION_PAGES: SectionPageMeta[] = [
     hub: "other",
   },
   {
+    id: "aoe-configuration",
+    title: "AOE Configuration",
+    description: "Configure Ask at Order Entry forms for tests, bills, and promotions.",
+    hub: "nav",
+  },
+  {
+    id: "consent-form-configuration",
+    title: "Consent Form Configuration",
+    description: "Configure consent forms captured during registration and billing.",
+    hub: "nav",
+  },
+  {
+    id: "additional-patient-info",
+    title: "Additional Patient Info",
+    description: "Configure additional patient information fields collected at order entry.",
+    hub: "nav",
+  },
+  {
     id: "integration",
     title: "Integration Dashboard",
     description: "Connected systems, APIs, and integration health.",
@@ -475,6 +509,12 @@ const CLIENT_PRICING_CHILDREN: NavChildItem[] = [
   { id: "add-test-to-list-bulk", label: "Add Test to List(Bulk)" },
 ];
 
+const LAB_FORMS_MANAGEMENT_CHILDREN: NavChildItem[] = [
+  { id: "aoe-configuration", label: "AOE Configuration" },
+  { id: "consent-form-configuration", label: "Consent Form Configuration" },
+  { id: "additional-patient-info", label: "Additional Patient Info" },
+];
+
 /** Nav group id → hub card / root section id */
 export const NAV_GROUP_ROOT_SECTION_IDS: Record<string, SectionPageId> = {
   [TEST_MASTER_NAV_ID]: "profile",
@@ -499,6 +539,12 @@ export const ACCOUNT_NAV: NavItem[] = [
     icon: "grid",
     children: CLIENT_PRICING_CHILDREN,
   },
+  {
+    id: LAB_FORMS_MANAGEMENT_NAV_ID,
+    label: "Lab Forms Management",
+    icon: "grid",
+    children: LAB_FORMS_MANAGEMENT_CHILDREN,
+  },
   { id: "integration", label: "Integration Dashboard", icon: "pie" },
   { id: "activity", label: "Activity Log", icon: "grid" },
   {
@@ -517,7 +563,7 @@ export function getAccountNavShortcutItems(): NavItem[] {
   for (const item of ACCOUNT_NAV) {
     if (item.id === "admin" || item.id === "center" || item.id === ONBOARDING_NAV_ID) continue;
     if (item.children) {
-      if (item.id === TEST_MASTER_NAV_ID || item.id === CLIENT_PRICING_NAV_ID) {
+      if (item.id === TEST_MASTER_NAV_ID || item.id === CLIENT_PRICING_NAV_ID || item.id === LAB_FORMS_MANAGEMENT_NAV_ID) {
         items.push({ id: item.id, label: item.label, icon: item.icon });
         continue;
       }
