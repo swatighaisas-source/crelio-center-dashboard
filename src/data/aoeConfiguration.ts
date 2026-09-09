@@ -153,6 +153,12 @@ export const mockAoeConfigurations: AoeConfigListItem[] = [
     captureFrequency: DEFAULT_AOE_CAPTURE_FREQUENCY,
     mappedTests: [
       {
+        testId: "test-dengue-ns1",
+        testName: "Dengue NS1",
+        testCode: "SERO045",
+        sampleType: "Serum",
+      },
+      {
         testId: "7063835",
         testName: "Dengue NS1",
         testCode: "SERO045",
@@ -205,6 +211,12 @@ export const mockAoeConfigurations: AoeConfigListItem[] = [
     aoeCode: "",
     captureFrequency: DEFAULT_AOE_CAPTURE_FREQUENCY,
     mappedTests: [
+      {
+        testId: "test-ammonia",
+        testName: "Ammonia",
+        testCode: "BIOC012",
+        sampleType: "Serum",
+      },
       {
         testId: "761004",
         testName: "AMMONIA",
@@ -303,7 +315,8 @@ export function findAoeConfigsForBillTest(
 
 /**
  * Find the preferred AOE configuration for a billing test.
- * Prefers enabled Test-type configs, then any Test-type match.
+ * Prefers Test-type configs (enabled first), then any match.
+ * Capture frequency always comes from this preferred config.
  */
 export function findAoeConfigForBillTest(
   testId: string,

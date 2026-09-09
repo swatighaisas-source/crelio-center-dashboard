@@ -114,4 +114,26 @@ describe("buildAoeInstanceQueue", () => {
       "Ammonia (Instance 2 of 2) | Section 1",
     );
   });
+
+  it("applies different capture frequencies per test when resolver is per-test", () => {
+    const items = [
+      makeLineItem({ id: "li-a", testId: "test-ammonia", sortIndex: 0, qty: 3 }),
+      makeLineItem({ id: "li-d", testId: "test-dengue-ns1", sortIndex: 1, qty: 1 }),
+    ];
+    const resolve = (testId: string) =>
+      testId === "test-ammonia" ? ("ONCE_PER_TEST" as const) : ("ONCE_PER_TEST_INSTANCE" as const);
+
+    const steps = buildAoeInstanceQueue(items, resolve, formLookup);
+    const ammoniaStarts = steps.filter(
+      (step) => step.testId === "test-ammonia" && step.sectionIndex === 0,
+    );
+    const dengueStarts = steps.filter(
+      (step) => step.testId === "test-dengue-ns1" && step.sectionIndex === 0,
+    );
+
+    expect(ammoniaStarts).toHaveLength(1);
+    expect(ammoniaStarts[0].instanceTotal).toBe(1);
+    expect(getInstanceLabel(1, ammoniaStarts[0].instanceTotal)).toBe("");
+    expect(dengueStarts).toHaveLength(1);
+  });
 });

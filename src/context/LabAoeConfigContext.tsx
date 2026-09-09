@@ -8,9 +8,7 @@ import {
 } from "react";
 import {
   findAoeConfigForBillTest,
-  findAoeConfigsForBillTest,
   getAoeConfiguration,
-  mockAoeConfigurations,
 } from "../data/aoeConfiguration";
 import {
   DEFAULT_AOE_CAPTURE_FREQUENCY,
@@ -23,8 +21,9 @@ const AOE_CONFIG_STORAGE_KEY = "crelio-aoe-config-by-lab";
 type AoeConfigByLab = Record<
   string,
   {
-    /** Last AOE Capture Frequency saved from any AOE Configuration form. */
+    /** @deprecated Lab-wide override — no longer used for billing/View AOE. */
     captureFrequency?: AoeCaptureFrequency;
+    /** Per AOE Configuration id → capture frequency. */
     byConfigId?: Record<string, AoeCaptureFrequency>;
   }
 >;
@@ -46,7 +45,6 @@ function defaultFrequencyForConfig(configId: number): AoeCaptureFrequency {
 }
 
 interface LabAoeConfigContextValue {
-  getCaptureFrequency: (labId: number) => AoeCaptureFrequency;
   getCaptureFrequencyForConfig: (labId: number, configId: number) => AoeCaptureFrequency;
   setCaptureFrequencyForConfig: (
     labId: number,
@@ -83,7 +81,6 @@ export function LabAoeConfigProvider({ children }: { children: ReactNode }) {
           ...prev,
           [key]: {
             ...existing,
-            captureFrequency: frequency,
             byConfigId: {
               ...(existing.byConfigId ?? {}),
               [String(configId)]: frequency,
@@ -99,53 +96,24 @@ export function LabAoeConfigProvider({ children }: { children: ReactNode }) {
 
   const getCaptureFrequencyForTest = useCallback(
     (labId: number, testId: string, testName: string): AoeCaptureFrequency => {
-      const labConfig = configByLab[labKey(labId)];
-      const matches = findAoeConfigsForBillTest(testId, testName, mockAoeConfigurations);
+      const preferred = findAoeConfigForBillTest(testId, testName);
+      if (!preferred) return DEFAULT_AOE_CAPTURE_FREQUENCY;
 
-      // Prefer an explicit override saved on any matching AOE Configuration form.
-      for (const match of matches) {
-        const stored = labConfig?.byConfigId?.[String(match.id)];
-        if (stored) return stored;
-      }
+      const stored = configByLab[labKey(labId)]?.byConfigId?.[String(preferred.id)];
+      if (stored) return stored;
 
-      // Prefer the last Capture Frequency saved from AOE Configuration (lab-wide).
-      if (labConfig?.captureFrequency) {
-        return labConfig.captureFrequency;
-      }
-
-      const preferred =
-        findAoeConfigForBillTest(testId, testName, matches) ?? matches[0];
-      if (preferred) {
-        return defaultFrequencyForConfig(preferred.id);
-      }
-
-      return DEFAULT_AOE_CAPTURE_FREQUENCY;
-    },
-    [configByLab],
-  );
-
-  const getCaptureFrequency = useCallback(
-    (labId: number): AoeCaptureFrequency => {
-      return (
-        configByLab[labKey(labId)]?.captureFrequency ?? DEFAULT_AOE_CAPTURE_FREQUENCY
-      );
+      return defaultFrequencyForConfig(preferred.id);
     },
     [configByLab],
   );
 
   const value = useMemo(
     () => ({
-      getCaptureFrequency,
       getCaptureFrequencyForConfig,
       setCaptureFrequencyForConfig,
       getCaptureFrequencyForTest,
     }),
-    [
-      getCaptureFrequency,
-      getCaptureFrequencyForConfig,
-      setCaptureFrequencyForConfig,
-      getCaptureFrequencyForTest,
-    ],
+    [getCaptureFrequencyForConfig, setCaptureFrequencyForConfig, getCaptureFrequencyForTest],
   );
 
   return (
@@ -159,17 +127,14 @@ export function useLabAoeConfig(labId: number) {
     throw new Error("useLabAoeConfig must be used within LabAoeConfigProvider");
   }
 
-  const captureFrequency = ctx.getCaptureFrequency(labId);
-
   return {
-    captureFrequency,
     getCaptureFrequencyForConfig: (configId: number) =>
       ctx.getCaptureFrequencyForConfig(labId, configId),
     setCaptureFrequencyForConfig: (configId: number, frequency: AoeCaptureFrequency) =>
       ctx.setCaptureFrequencyForConfig(labId, configId, frequency),
     getCaptureFrequencyForTest: (testId: string, testName: string) =>
       ctx.getCaptureFrequencyForTest(labId, testId, testName),
-    /** Resolver for bill AOE queues — governed by mapped AOE Configuration flag. */
+    /** Per-test resolver for bill / View AOE queues. */
     resolveFrequencyForTest: (testId: string, testName = "") =>
       ctx.getCaptureFrequencyForTest(labId, testId, testName),
   };

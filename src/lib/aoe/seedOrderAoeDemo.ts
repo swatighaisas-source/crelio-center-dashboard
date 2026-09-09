@@ -1,5 +1,6 @@
 import type { AoeAnswer, AoeCaptureFrequency, BillLineItem } from "../../data/aoeTypes";
 import { getAoeFormForTest } from "../../data/billTests";
+import type { AoeFrequencyInput } from "./aoeCompletion";
 import { getBillAoeAnswers, saveBillAoeAnswers } from "./aoeResponseStore";
 
 const DEMO_AMMONIA_INSTANCE_1: Record<string, string> = {
@@ -42,6 +43,13 @@ function buildAnswersForInstance(
   return answers;
 }
 
+function resolveFrequency(
+  frequency: AoeFrequencyInput,
+  testId: string,
+): AoeCaptureFrequency {
+  return typeof frequency === "function" ? frequency(testId) : frequency;
+}
+
 function instanceCountForLineItem(
   lineItem: BillLineItem,
   frequency: AoeCaptureFrequency,
@@ -55,7 +63,7 @@ export function ensureDemoOrderAoeAnswers(
   labId: number,
   billId: string,
   lineItems: BillLineItem[],
-  captureFrequency: AoeCaptureFrequency = "ONCE_PER_TEST_INSTANCE",
+  captureFrequency: AoeFrequencyInput = "ONCE_PER_TEST_INSTANCE",
 ) {
   const existing = getBillAoeAnswers(labId, billId, lineItems);
   if (existing.length > 0) return;
@@ -64,9 +72,10 @@ export function ensureDemoOrderAoeAnswers(
 
   for (const lineItem of lineItems) {
     if (!lineItem.hasAoe) continue;
+    const frequency = resolveFrequency(captureFrequency, lineItem.testId);
 
     if (lineItem.testId === "test-ammonia") {
-      const instanceTotal = instanceCountForLineItem(lineItem, captureFrequency);
+      const instanceTotal = instanceCountForLineItem(lineItem, frequency);
       for (let instanceIndex = 1; instanceIndex <= instanceTotal; instanceIndex += 1) {
         const suffix = instanceIndex === 1 ? "" : `-${instanceIndex}`;
         const values = Object.fromEntries(

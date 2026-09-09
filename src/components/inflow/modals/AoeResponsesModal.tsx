@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AoeAnswer, AoeCaptureFrequency } from "../../../data/aoeTypes";
 import { getAoeFormForTest } from "../../../data/billTests";
 import { useLabAoeConfig } from "../../../context/LabAoeConfigContext";
@@ -82,13 +82,21 @@ function isNavItemComplete(
 }
 
 export function AoeResponsesModal({ labId, order, open, onClose }: Props) {
-  const { captureFrequency } = useLabAoeConfig(labId);
+  const { getCaptureFrequencyForTest } = useLabAoeConfig(labId);
   const billId = String(order.id);
   const lineItems = useMemo(() => orderServicesToLineItems(order.services), [order.services]);
 
+  const resolveFrequency = useCallback(
+    (testId: string) => {
+      const item = lineItems.find((line) => line.testId === testId);
+      return getCaptureFrequencyForTest(testId, item?.testName ?? "");
+    },
+    [lineItems, getCaptureFrequencyForTest],
+  );
+
   const steps = useMemo(
-    () => buildAoeInstanceQueue(lineItems, captureFrequency),
-    [lineItems, captureFrequency],
+    () => buildAoeInstanceQueue(lineItems, resolveFrequency),
+    [lineItems, resolveFrequency],
   );
 
   const navItems = useMemo(() => buildAoeNavItems(steps), [steps]);
@@ -97,9 +105,9 @@ export function AoeResponsesModal({ labId, order, open, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    ensureDemoOrderAoeAnswers(labId, billId, lineItems, captureFrequency);
+    ensureDemoOrderAoeAnswers(labId, billId, lineItems, resolveFrequency);
     setAnswers(getBillAoeAnswers(labId, billId, lineItems));
-  }, [open, labId, billId, lineItems, captureFrequency]);
+  }, [open, labId, billId, lineItems, resolveFrequency]);
 
   useEffect(() => {
     if (!open || navItems.length === 0) return;
@@ -117,13 +125,17 @@ export function AoeResponsesModal({ labId, order, open, onClose }: Props) {
     ? getInstanceLabel(selectedNavItem.instanceNumber, selectedNavItem.instanceTotal)
     : "";
 
+  const selectedFrequency = selectedNavItem
+    ? resolveFrequency(selectedNavItem.testId)
+    : "ONCE_PER_TEST_INSTANCE";
+
   const storageAnchor = selectedNavItem
     ? resolveStorageAnchor(
         selectedNavItem.lineItemId,
         selectedNavItem.instanceIndex,
         selectedNavItem.testId,
         lineItems,
-        captureFrequency,
+        selectedFrequency,
       )
     : null;
 
@@ -163,7 +175,7 @@ export function AoeResponsesModal({ labId, order, open, onClose }: Props) {
                 item,
                 steps,
                 answers,
-                captureFrequency,
+                resolveFrequency(item.testId),
                 lineItems,
               );
               return (

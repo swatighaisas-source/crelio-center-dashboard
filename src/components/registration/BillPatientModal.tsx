@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useInflow } from "../../context/InflowContext";
 import { useLabAoeConfig } from "../../context/LabAoeConfigContext";
@@ -78,7 +78,7 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
   const navigate = useNavigate();
   const { createOrder, orders, setSelectedOrderId } = useInflow();
   const { paymentModes, visiblePaymentModeOptions } = usePaymentModes(labId);
-  const { captureFrequency } = useLabAoeConfig(labId);
+  const { getCaptureFrequencyForTest } = useLabAoeConfig(labId);
   const billDraftOrderId = useMemo(() => getRegistrationBillDraftOrderId(labId), [labId]);
   const billDraftId = useMemo(() => String(billDraftOrderId), [billDraftOrderId]);
   const [selectedSource, setSelectedSource] = useState<(typeof BILL_SOURCES)[number]>("Self Pay");
@@ -93,6 +93,14 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
   const wasOpenRef = useRef(false);
 
   const { savedPayments } = useOrderPaymentList(labId, billDraftOrderId);
+
+  const resolveFrequency = useCallback(
+    (testId: string) => {
+      const item = lineItems.find((line) => line.testId === testId);
+      return getCaptureFrequencyForTest(testId, item?.testName ?? "");
+    },
+    [lineItems, getCaptureFrequencyForTest],
+  );
 
   const testAmount = useMemo(
     () =>
@@ -109,13 +117,13 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
   );
 
   const aoeComplete = useMemo(
-    () => isBillAoeComplete(lineItems, captureFrequency, answers),
-    [lineItems, captureFrequency, answers],
+    () => isBillAoeComplete(lineItems, resolveFrequency, answers),
+    [lineItems, resolveFrequency, answers],
   );
 
   const aoeStatus = useMemo(
-    () => validateBillAoe(lineItems, captureFrequency, answers),
-    [lineItems, captureFrequency, answers],
+    () => validateBillAoe(lineItems, resolveFrequency, answers),
+    [lineItems, resolveFrequency, answers],
   );
 
   useEffect(() => {
@@ -535,11 +543,11 @@ export function BillPatientModal({ labId, open, onClose }: Props) {
         billId={billDraftId}
         open={aoeModalOpen}
         lineItems={lineItems}
-        frequency={captureFrequency}
+        frequency={resolveFrequency}
         patient={PATIENT_CONTEXT}
         onClose={() => setAoeModalOpen(false)}
         onComplete={() => {
-          setToast(getAoeCompletionMessage(lineItems, captureFrequency, answers));
+          setToast(getAoeCompletionMessage(lineItems, resolveFrequency, answers));
         }}
       />
 
